@@ -1,0 +1,24 @@
+1. How the program works:
+main.py: 
+- Handles ueser input: user must input a crawler mode/ user must input a query for initial search
+- Configure logger: set format, set log level and log file name
+- Generate seed pages: use googlesearch module, pass in the query and get inital 10 links
+In main(), it create crawler and call crawl() and pass in the max amount of links to be crawled and seed pages 
+
+crawler.py: 
+- Create crawler object: crawler object has two main functions: crawl() and parse()
+
+- In crawl(),it fetches a link from the uncrawled queue and start a new job parse() with the link passed in in the treadpool with max 20 workers until either the queue is empty or the max link is reached.
+- In parse(), it will first do robot exclusion check. Then if the check passed, it will use finder to fetch the source of the link. After the link is succeefully retrieved, it will use beautiful soup to find all hyperlinks. For each hyper link, it will check file type, omit hashtag, fix url ambiguity. Then it will check if the link is crawled, and if it is added to the uncrawled queue (If it does, increase importance socre and update by creating a new entry).At last, if everything is ok, the link will get a score (if the mode is priority) using calcauateScore() and get added to the uncrawled queue.
+- The score is combined with two aspects: importance and novelty. Importance are how many time a url get found through other links, we passed the number into the sigmoid function the scale it down between 0 and 1. The novelty is in inverse proportion to the number of the site where the link belongs to get crawled.
+
+finder.py: it create a finder object that used to fetch pagesource, find source size and return these information. It uses reqests module to open an url and fetch its html source.
+- fetch(): open a url and return its source.
+- check_fetch_status(): make sure the url is opened properly and make sure the content is html format.
+
+
+2. Bugs and Limitations
+- When the maxlinks gets to over 10000 links, the performance of the crawler is unstable. Sometimes it will stop after crawling 8000-9000 links.
+- The time it takes to crawl 10000 is around 20 - 25 minutes.
+- The googleseach sometimes can not get seed pages
+
